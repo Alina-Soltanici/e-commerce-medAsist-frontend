@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ro">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedAsist | Înregistrare</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            background-color: #f1f5f9;
+        }
+
+        h2 {
+            font-family: 'Sora', sans-serif;
+        }
+
+        .form-input {
+            width: 100%;
+            padding-left: 2.75rem;
+            padding-right: 1rem;
+            padding-top: 0.875rem;
+            padding-bottom: 0.875rem;
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            border: 2px solid transparent;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.07);
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        .password-toggle { cursor: pointer; }
+
+        /* START: Animația pentru containerul criteriilor */
+        #password-criteria-wrapper {
+            transition: grid-template-rows 0.4s ease-in-out;
+            display: grid;
+            grid-template-rows: 0fr; /* Starea inițială: înălțime zero */
+        }
+
+        #password-criteria-wrapper.visible {
+            grid-template-rows: 1fr; /* Starea finală: înălțimea necesară conținutului */
+        }
+
+        #password-criteria {
+            overflow: hidden; /* Esențial pentru a ascunde conținutul în timpul tranziției */
+        }
+        /* END: Animația pentru container */
+        
+        /* START: Animație SMOOTH în cascadă pentru itemii listei */
+        #password-criteria-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            /* Stare inițială pentru animație */
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        }
+
+        /* Stare finală (vizibilă) pentru itemi, când containerul are clasa .visible */
+        #password-criteria-wrapper.visible #password-criteria-list li {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Delay pentru fiecare item, creând efectul de cascadă */
+        #password-criteria-wrapper.visible #password-criteria-list li:nth-child(1) { transition-delay: 0.05s; }
+        #password-criteria-wrapper.visible #password-criteria-list li:nth-child(2) { transition-delay: 0.1s; }
+        #password-criteria-wrapper.visible #password-criteria-list li:nth-child(3) { transition-delay: 0.15s; }
+        #password-criteria-wrapper.visible #password-criteria-list li:nth-child(4) { transition-delay: 0.2s; }
+        /* END: Animație SMOOTH */
+
+        .criterion.valid { color: #16a34a; }
+        .criterion.invalid { color: #dc2626; }
+
+        .custom-checkbox input { display: none; }
+        .custom-checkbox .checkbox-box {
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid #cbd5e1;
+            border-radius: 0.375rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease-in-out;
+            flex-shrink: 0;
+        }
+        .custom-checkbox .checkmark {
+            color: white;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.2s ease-in-out;
+        }
+        .custom-checkbox input:checked + .checkbox-box {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+        .custom-checkbox input:checked + .checkbox-box .checkmark {
+            opacity: 1;
+            transform: scale(1);
+        }
+    </style>
+</head>
+
+<body>
+     <header class="fixed top-0 left-0 right-0 z-[100] p-4">
+        <nav id="navbar-container" class="max-w-7xl mx-auto bg-white/70 backdrop-blur-lg rounded-full shadow-sm transition-all duration-300">
+            <div class="flex justify-between items-center px-6 py-3">
+                <a href="index.html"><img src="img/medasist.svg" alt="MedAsist Logo" class="h-8 w-auto"></a>
+                <div class="hidden lg:flex items-center gap-10 text-gray-700 font-medium">
+                    <a href="produse/produse.html" class="nav-link hover:text-blue-600">Produse</a>
+                    <a href="#contact" class="nav-link hover:text-blue-600">Contact</a>
+                </div>
+                <div class="hidden lg:flex items-center gap-4">
+                    <div id="language-switcher" class="relative">
+                        <button id="language-switcher-button" class="flex items-center gap-2 font-medium text-gray-600 hover:text-blue-600 transition-colors px-4 py-2">
+                            <i class="fa-solid fa-globe"></i>
+                            <span>RO</span>
+                            <i class="fa-solid fa-chevron-down text-xs transition-transform duration-300"></i>
+                        </button>
+                        <div id="language-switcher-panel" class="absolute top-full right-0 mt-2 w-40 bg-white rounded-lg shadow-xl p-2 z-[101] opacity-0 pointer-events-none transform translate-y-2 transition-all duration-300">
+                            <a href="#" class="block px-4 py-2 text-gray-700 rounded-md hover:bg-gray-100">Română (RO)</a>
+                            <a href="#" class="block px-4 py-2 text-gray-700 rounded-md hover:bg-gray-100">Русский (RU)</a>
+                        </div>
+                    </div>
+                    <div class="h-6 border-l border-gray-200"></div>
+                     <a href="signup.html" class="font-medium text-gray-600 hover:text-blue-600 transition-colors px-4 py-2 rounded-full hover:bg-gray-100">Autentificare</a>
+                     <a href="sign-in.html" class="bg-blue-600 text-white font-semibold px-5 py-2 rounded-full hover:bg-blue-700 transition-colors">Înregistrare</a>
+                     <div class="flex items-center gap-5 text-xl pl-4 border-l border-gray-200 ml-2">
+                        <a href="#" class="icon-hover-effect text-gray-400 hover:text-blue-600" title="Favorite"><i class="fa-solid fa-heart"></i></a>
+                        <a href="#" class="icon-hover-effect text-gray-400 hover:text-blue-600" title="Coș de cumpărături"><i class="fa-solid fa-cart-shopping"></i></a>
+                        <a href="#" class="icon-hover-effect text-gray-400 hover:text-blue-600" title="Contul meu"><i class="fa-solid fa-user"></i></a>
+                    </div>
+                </div>
+                <div class="lg:hidden">
+                    <button id="hamburger-button" class="text-2xl text-gray-800"><i class="fa-solid fa-bars"></i></button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="relative min-h-screen w-full flex items-center justify-center lg:justify-end py-24">
+        <div class="absolute inset-0 z-10 bg-gray-300 hidden lg:block" style="clip-path: polygon(43% 0, 40% 0, 52% 100%, 55% 100%);"></div>
+        <div class="absolute inset-0 z-40 bg-blue-700 hidden lg:block" style="clip-path: polygon(38% 0, 35% 0, 48% 100%, 51% 100%);"></div>
+        <div class="absolute inset-0 z-9 bg-blue-500 hidden lg:block" style="clip-path: polygon(42% 0, 38% 0, 50% 100%, 52% 100%);"></div>
+        <div class="absolute inset-0 z-30 bg-blue-500 hidden lg:block" style="clip-path: polygon(0 0, 35% 0, 49% 100%, 0% 100%);"></div>
+
+        <div class="relative z-50 lg:mr-[10%] w-full max-w-lg mx-auto px-6 lg:px-0">
+            <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Creează Cont</h2>
+            <form class="space-y-5">
+                <div class="relative flex items-center"><i class="fa-solid fa-user absolute left-4 text-gray-400"></i><input type="text" placeholder="Nume complet" required class="form-input"></div>
+                <div class="relative flex items-center"><i class="fa-solid fa-envelope absolute left-4 text-gray-400"></i><input type="email" placeholder="Adresa de Email" required class="form-input"></div>
+                
+                <div>
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-lock absolute left-4 text-gray-400"></i>
+                        <input id="signup-password" type="password" placeholder="Parola" required class="form-input pr-10">
+                        <i class="fa-solid fa-eye absolute right-4 text-gray-400 password-toggle" data-target="signup-password"></i>
+                    </div>
+                    <div id="password-criteria-wrapper">
+                        <div id="password-criteria" class="text-xs text-gray-600 pt-3 pl-1">
+                             <ul id="password-criteria-list" class="space-y-1.5">
+                                 <li id="length-criterion" class="criterion"><i class="fa-regular fa-circle"></i><span>Cel puțin 8 caractere</span></li>
+                                 <li id="upper-criterion" class="criterion"><i class="fa-regular fa-circle"></i><span>O literă mare (A-Z)</span></li>
+                                 <li id="number-criterion" class="criterion"><i class="fa-regular fa-circle"></i><span>O cifră (0-9)</span></li>
+                                 <li id="special-criterion" class="criterion"><i class="fa-regular fa-circle"></i><span>Un caracter special (!@#$)</span></li>
+                             </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative flex items-center">
+                    <i class="fa-solid fa-lock absolute left-4 text-gray-400"></i>
+                    <input id="confirm-password" type="password" placeholder="Confirmă Parola" required class="form-input pr-10">
+                    <i class="fa-solid fa-eye absolute right-4 text-gray-400 password-toggle" data-target="confirm-password"></i>
+                </div>
+                <div id="password-match-status" class="text-sm pl-1 -mt-2 h-5"></div>
+
+
+                <div class="space-y-4 pt-2">
+                    <label for="terms-checkbox" class="custom-checkbox flex items-center cursor-pointer">
+                        <input id="terms-checkbox" type="checkbox">
+                        <span class="checkbox-box"><i class="fa-solid fa-check checkmark text-xs"></i></span>
+                        <span class="ml-3 text-base text-gray-600">Sunt de acord cu <a href="#" class="font-medium text-blue-500 hover:underline">Termenii și Condițiile</a>.</span>
+                    </label>
+                    <label for="privacy-checkbox" class="custom-checkbox flex items-center cursor-pointer">
+                        <input id="privacy-checkbox" type="checkbox">
+                         <span class="checkbox-box"><i class="fa-solid fa-check checkmark text-xs"></i></span>
+                        <span class="ml-3 text-base text-gray-600">Am citit și sunt de acord cu <a href="#" class="font-medium text-blue-500 hover:underline">Politica de Confidențialitate</a>.</span>
+                    </label>
+                </div>
+
+                <div id="form-notice" class="text-xs text-red-500 text-center h-4 pt-1"></div>
+
+                <button id="submit-button" type="submit" disabled 
+                    class="w-full py-3.5 px-4 rounded-xl text-white bg-blue-500 hover:bg-blue-600 font-semibold disabled:bg-blue-300 disabled:text-white disabled:cursor-not-allowed transition-colors">
+                    Creează Cont
+                </button>
+            </form>
+
+            <p class="mt-8 text-center text-sm text-gray-600">
+                Ai deja un cont? <a href="signup.html" class="font-medium text-blue-500 hover:underline">Autentifică-te</a>
+            </p>
+        </div>
+    </main>
+
+     <footer class="bg-gray-900 text-gray-300">
+        <div class="container mx-auto px-12 sm:px-16 py-16">
+            <div class="grid md:grid-cols-4 gap-12 text-center md:text-left">
+                <div>
+                    <img src="img/medasist.svg" alt="MedAsist Logo" class="h-9 w-auto mb-4 mx-auto md:mx-0 invert brightness-0">
+                    <p class="text-sm">Partenerul dumneavoastră de încredere pentru echipamente medicale profesionale.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-white text-lg mb-4">Linkuri Utile</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Acasă</a></li>
+                        <li><a href="#categorii" class="hover:text-blue-400 transition-colors">Produse</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Termeni și Condiții</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-white text-lg mb-4">Contact</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-center justify-center md:justify-start gap-2"><i class="fa-solid fa-phone w-4"></i> +373 22 123 456</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-white text-lg mb-4">Urmărește-ne</h4>
+                    <div class="flex justify-center md:justify-start gap-5 text-2xl">
+                        <a href="#" class="icon-hover-effect text-gray-400 hover:text-blue-400"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="icon-hover-effect text-gray-400 hover:text-blue-400"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="icon-hover-effect text-gray-400 hover:text-blue-400"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-12 border-t border-gray-700 pt-8 text-center text-sm text-gray-500">
+                <p>&copy; 2025 MedAsist. Toate drepturile rezervate.</p>
+                <p class="mt-2 text-sm text-gray-600">Front-End realizat de <a href="https://webglow-studio.netlify.app" target="_blank" rel="noopener noreferrer" class="font-semibold text-gray-500 hover:text-blue-400">WebGlow</a></p>
+                </div>
+        </div>
+    </footer>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const signupPassword = document.getElementById('signup-password');
+            const confirmPassword = document.getElementById('confirm-password');
+            const criteriaWrapper = document.getElementById('password-criteria-wrapper');
+            const passwordMatchStatus = document.getElementById('password-match-status');
+            const termsCheckbox = document.getElementById('terms-checkbox');
+            const privacyCheckbox = document.getElementById('privacy-checkbox');
+            const submitButton = document.getElementById('submit-button');
+            const passwordToggles = document.querySelectorAll('.password-toggle');
+            const formNotice = document.getElementById('form-notice');
+
+            const criteria = {
+                length: { el: document.getElementById('length-criterion'), valid: false, icon: document.querySelector('#length-criterion i') },
+                upper: { el: document.getElementById('upper-criterion'), valid: false, icon: document.querySelector('#upper-criterion i') },
+                number: { el: document.getElementById('number-criterion'), valid: false, icon: document.querySelector('#number-criterion i') },
+                special: { el: document.getElementById('special-criterion'), valid: false, icon: document.querySelector('#special-criterion i') },
+            };
+
+            passwordToggles.forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    const targetInput = document.getElementById(toggle.dataset.target);
+                    if (targetInput.type === 'password') {
+                        targetInput.type = 'text';
+                        toggle.classList.replace('fa-eye', 'fa-eye-slash');
+                    } else {
+                        targetInput.type = 'password';
+                        toggle.classList.replace('fa-eye-slash', 'fa-eye');
+                    }
+                });
+            });
+
+            function updateCriterionUI(criterionKey, isValid) {
+                const criterion = criteria[criterionKey];
+                criterion.valid = isValid;
+                
+                if (isValid) {
+                    criterion.el.classList.add('valid');
+                    criterion.el.classList.remove('invalid');
+                    criterion.icon.className = 'fa-solid fa-circle-check';
+                } else {
+                    criterion.el.classList.add('invalid');
+                    criterion.el.classList.remove('valid');
+                    criterion.icon.className = 'fa-solid fa-circle-xmark';
+                }
+            }
+
+            function validatePassword() {
+                const pass = signupPassword.value;
+                // Aici se adaugă sau se elimină clasa .visible, declanșând animația CSS
+                if (pass.length > 0) {
+                    criteriaWrapper.classList.add('visible');
+                } else {
+                    criteriaWrapper.classList.remove('visible');
+                }
+                
+                updateCriterionUI('length', pass.length >= 8);
+                updateCriterionUI('upper', /[A-Z]/.test(pass));
+                updateCriterionUI('number', /[0-9]/.test(pass));
+                updateCriterionUI('special', /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pass));
+
+                checkPasswordsMatch();
+                checkFormValidity();
+            }
+
+            function checkPasswordsMatch() {
+                const pass1 = signupPassword.value;
+                const pass2 = confirmPassword.value;
+
+                if (pass2.length > 0 && pass1.length > 0) {
+                    if (pass1 === pass2) {
+                        passwordMatchStatus.innerHTML = `<span class="flex items-center gap-2 text-green-600"><i class="fa-solid fa-circle-check"></i>Parolele se potrivesc</span>`;
+                    } else {
+                        passwordMatchStatus.innerHTML = `<span class="flex items-center gap-2 text-red-600"><i class="fa-solid fa-circle-xmark"></i>Parolele nu se potrivesc</span>`;
+                    }
+                } else {
+                    passwordMatchStatus.innerHTML = '';
+                }
+                checkFormValidity();
+            }
+
+            function checkFormValidity() {
+                const allCriteriaMet = Object.values(criteria).every(c => c.valid);
+                const passwordsMatch = signupPassword.value === confirmPassword.value && confirmPassword.value.length > 0;
+                const termsAccepted = termsCheckbox.checked && privacyCheckbox.checked;
+                
+                const isFormValid = allCriteriaMet && passwordsMatch && termsAccepted;
+                submitButton.disabled = !isFormValid;
+
+                if (isFormValid) {
+                    formNotice.textContent = '';
+                } else if(signupPassword.value.length > 0) {
+                    formNotice.textContent = 'Completați toate câmpurile și acceptați termenii pentru a continua.';
+                } else {
+                    formNotice.textContent = '';
+                }
+            }
+
+            signupPassword.addEventListener('input', validatePassword);
+            confirmPassword.addEventListener('input', checkPasswordsMatch);
+            termsCheckbox.addEventListener('change', checkFormValidity);
+            privacyCheckbox.addEventListener('change', checkFormValidity);
+            
+            checkFormValidity();
+        });
+    </script>
+</body>
+
+</html>

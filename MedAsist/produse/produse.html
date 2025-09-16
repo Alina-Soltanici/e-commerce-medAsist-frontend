@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produse | MedAsist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Slate 50 */
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Sora', sans-serif;
+        }
+
+        /* --- Stiluri Custom pentru Filtre și Carduri --- */
+
+        /* Slider de Preț Custom */
+        .price-slider { position: relative; height: 4px; background-color: #e2e8f0; border-radius: 2px; }
+        .price-slider .progress { position: absolute; height: 4px; background-color: #3b82f6; border-radius: 2px; }
+        .range-input { position: relative; }
+        .range-input input { position: absolute; top: -10px; width: 100%; height: 4px; background: none; pointer-events: none; -webkit-appearance: none; -moz-appearance: none; }
+        .range-input input::-webkit-slider-thumb { height: 16px; width: 16px; border-radius: 50%; background: #3b82f6; border: 2px solid white; box-shadow: 0 0 0 2px #3b82f6; pointer-events: auto; -webkit-appearance: none; cursor: pointer; }
+        .range-input input::-moz-range-thumb { height: 16px; width: 16px; border-radius: 50%; background: #3b82f6; border: 2px solid white; box-shadow: 0 0 0 2px #3b82f6; pointer-events: auto; -moz-appearance: none; cursor: pointer; }
+
+        /* Checkbox Custom */
+        .custom-checkbox:checked { background-color: #3b82f6; border-color: #3b82f6; background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e"); }
+        
+        /* Card de Produs Îmbunătățit */
+        .product-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .product-card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); }
+        .product-card .actions-overlay { opacity: 0; transition: opacity 0.3s ease; }
+        .product-card:hover .actions-overlay { opacity: 1; }
+        .product-grid-transition { transition: opacity 0.4s ease-in-out; }
+
+        /* Filtre Acordeon */
+        .filter-section-content { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease-out; }
+        .filter-section-content > div { overflow: hidden; }
+        .filter-section.open .filter-section-content { grid-template-rows: 1fr; }
+        .filter-section.open .chevron-icon { transform: rotate(180deg); }
+        .chevron-icon { transition: transform 0.3s ease-out; }
+
+        /* Filtre pe mobil (Off-canvas) */
+        #mobile-filters-menu { transition: transform 0.3s ease-in-out; }
+        #mobile-filters-menu.translate-x-0 { transform: translateX(0); }
+        #mobile-filters-menu.-translate-x-full { transform: translateX(-100%); }
+        #mobile-filters-overlay { transition: opacity 0.3s ease-in-out; }
+
+        /* Skeleton Loader */
+        .skeleton-card { background-color: #fff; border-radius: 1rem; overflow: hidden; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+        .skeleton-img { height: 200px; background-color: #e2e8f0; }
+        .skeleton-text { height: 1rem; background-color: #e2e8f0; border-radius: 0.25rem; }
+        .skeleton-price { height: 1.5rem; width: 40%; background-color: #e2e8f0; border-radius: 0.25rem; }
+        @keyframes pulse { 50% { opacity: .5; } }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    </style>
+</head>
+<body>
+
+    <!-- =================================================================
+    HEADER (PĂSTRAT EXACT CA ÎN EXEMPLUL TĂU)
+    ================================================================== -->
+    <header class="fixed top-0 left-0 right-0 z-[100] p-4">
+        <nav id="navbar-container" class="max-w-7xl mx-auto bg-white/70 backdrop-blur-lg rounded-full shadow-sm transition-all duration-300">
+            <div class="flex justify-between items-center px-6 py-3">
+                <a href="#"><img src="https://placehold.co/140x32/3b82f6/ffffff?text=MedAsist" alt="MedAsist Logo" class="h-8 w-auto"></a>
+                <div class="hidden lg:flex items-center gap-10 text-gray-700 font-medium">
+                    <a href="#" class="nav-link hover:text-blue-600">Produse</a>
+                    <a href="#" class="nav-link hover:text-blue-600">Contact</a>
+                </div>
+                <div class="hidden lg:flex items-center gap-4">
+                    <div id="language-switcher" class="relative">
+                        <button id="language-switcher-button" class="flex items-center gap-2 font-medium text-gray-600 hover:text-blue-600 transition-colors px-4 py-2">
+                            <i class="fa-solid fa-globe"></i>
+                            <span>RO</span>
+                            <i class="fa-solid fa-chevron-down text-xs transition-transform duration-300"></i>
+                        </button>
+                        <div id="language-switcher-panel" class="absolute top-full right-0 mt-2 w-40 bg-white rounded-lg shadow-xl p-2 z-[101] opacity-0 pointer-events-none transform translate-y-2 transition-all duration-300">
+                            <a href="#" class="block px-4 py-2 text-gray-700 rounded-md hover:bg-gray-100">Română (RO)</a>
+                            <a href="#" class="block px-4 py-2 text-gray-700 rounded-md hover:bg-gray-100">Русский (RU)</a>
+                        </div>
+                    </div>
+                    <div class="h-6 border-l border-gray-200"></div>
+                    <a href="signup.html" 
+   class="font-medium text-gray-600 hover:text-blue-600 transition-colors px-4 py-2 rounded-full hover:bg-gray-100">
+   Autentificare
+</a>
+                   <a href="sign-in.html" 
+   class="bg-blue-600 text-white font-semibold px-5 py-2 rounded-full hover:bg-blue-700 transition-colors">
+   Înregistrare
+</a>
+
+                    <div class="flex items-center gap-5 text-xl pl-4 border-l border-gray-200 ml-2">
+                        <a href="#" class="icon-hover-effect text-gray-400 hover:text-blue-600" title="Favorite"><i class="fa-solid fa-heart"></i></a>
+                        <a id="cart-link" href="#" class="icon-hover-effect text-gray-400 hover:text-blue-600 relative" title="Coș de cumpărături">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                            <span id="cart-item-count" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center" style="display: none;">0</span>
+                        </a>
+                        <a href="#" class="icon-hover-effect text-gray-400 hover:text-blue-600" title="Contul meu"><i class="fa-solid fa-user"></i></a>
+                    </div>
+                </div>
+                <div class="lg:hidden">
+                    <button id="hamburger-button" class="text-2xl text-gray-800"><i class="fa-solid fa-bars"></i></button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- =================================================================
+    CONȚINUTUL PAGINII (SECȚIUNEA ÎMBUNĂTĂȚITĂ)
+    ================================================================== -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Catalogul Nostru</h1>
+            <p class="mt-3 max-w-2xl mx-auto text-lg text-gray-600">Găsește echipamentul perfect pentru nevoile tale.</p>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-8 lg:gap-12">
+            <!-- FILTRE PENTRU MOBIL (Buton de deschidere) -->
+            <div class="lg:hidden flex justify-between items-center">
+                 <button id="open-mobile-filters" class="flex items-center gap-2 text-lg font-semibold text-gray-800 bg-white px-5 py-2.5 rounded-xl shadow-sm">
+                    <i class="fa-solid fa-sliders"></i>
+                    Filtrează
+                </button>
+            </div>
+
+            <!-- FILTRE PENTRU DESKTOP (Sidebar) -->
+            <aside class="hidden lg:block w-full lg:w-1/4 xl:w-1/5">
+                <div id="desktop-filters-container" class="bg-white p-6 rounded-2xl shadow-sm sticky top-28">
+                    <!-- Conținutul filtrelor va fi injectat aici de JS -->
+                </div>
+            </aside>
+
+            <!-- SECȚIUNEA DE PRODUSE -->
+            <section class="w-full lg:w-3/4 xl:w-4/5">
+                <!-- Filtre Active & Sortare -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div id="active-filters-container" class="flex flex-wrap gap-2 items-center">
+                        <!-- Etichetele filtrelor active vor aparea aici -->
+                    </div>
+                    <!-- Dropdown Sortare Custom -->
+                    <div class="relative" id="sort-dropdown">
+                        <button id="sort-by-button" class="flex-shrink-0 flex items-center gap-2 bg-white px-4 py-2 rounded-lg border border-gray-300 shadow-sm">
+                            <i class="fa-solid fa-arrow-up-down-wide-short text-gray-500"></i>
+                            <span class="font-medium text-gray-700">Sortare</span>
+                            <i class="fa-solid fa-chevron-down text-xs text-gray-500 transition-transform"></i>
+                        </button>
+                        <div id="sort-by-panel" class="absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-xl p-2 z-10 opacity-0 pointer-events-none transform -translate-y-2 transition-all duration-200">
+                             <a href="#" data-sort="default" class="sort-option flex items-center gap-3 px-4 py-2 text-gray-700 rounded-md hover:bg-gray-100"><i class="fa-solid fa-star w-4 text-gray-400"></i>Implicită</a>
+                             <a href="#" data-sort="price-asc" class="sort-option flex items-center gap-3 px-4 py-2 text-gray-700 rounded-md hover:bg-gray-100"><i class="fa-solid fa-arrow-up-short-wide w-4 text-gray-400"></i>Preț: Mic la Mare</a>
+                             <a href="#" data-sort="price-desc" class="sort-option flex items-center gap-3 px-4 py-2 text-gray-700 rounded-md hover:bg-gray-100"><i class="fa-solid fa-arrow-down-wide-short w-4 text-gray-400"></i>Preț: Mare la Mic</a>
+                             <a href="#" data-sort="name-asc" class="sort-option flex items-center gap-3 px-4 py-2 text-gray-700 rounded-md hover:bg-gray-100"><i class="fa-solid fa-arrow-down-a-z w-4 text-gray-400"></i>Nume: A la Z</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grila de Produse -->
+                <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8 product-grid-transition">
+                    <!-- Produsele sau Skeleton Loaders vor fi injectate aici de JS -->
+                </div>
+
+                <!-- Mesaj pentru Niciun Produs Găsit -->
+                <div id="no-products-message" class="hidden text-center py-16">
+                    <i class="fa-solid fa-box-open text-6xl text-gray-300 mb-4"></i>
+                    <h3 class="text-2xl font-bold text-gray-800">Niciun produs găsit</h3>
+                    <p class="text-gray-600 mt-2">Încearcă să ajustezi filtrele pentru a găsi ceea ce cauți.</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- FILTRE PENTRU MOBIL (Meniul Off-canvas) -->
+    <div id="mobile-filters-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-[110] hidden lg:hidden"></div>
+    <div id="mobile-filters-menu" class="fixed top-0 left-0 h-full w-full max-w-sm bg-white z-[120] p-6 overflow-y-auto -translate-x-full lg:hidden">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold text-gray-900">Filtre</h3>
+            <button id="close-mobile-filters" class="text-2xl text-gray-500 hover:text-gray-800">&times;</button>
+        </div>
+        <div id="mobile-filters-content">
+            <!-- Conținutul filtrelor va fi injectat aici de JS -->
+        </div>
+    </div>
+
+    <!-- =================================================================
+    FOOTER (PĂSTRAT EXACT CA ÎN EXEMPLUL TĂU)
+    ================================================================== -->
+     <footer class="bg-gray-900 text-gray-300">
+        <div class="container mx-auto px-12 sm:px-16 py-16">
+            <div class="grid md:grid-cols-4 gap-12 text-center md:text-left">
+                <div>
+                    <img src="img/medasist.svg" alt="MedAsist Logo" class="h-9 w-auto mb-4 mx-auto md:mx-0 invert brightness-0">
+                    <p class="text-sm">Partenerul dumneavoastră de încredere pentru echipamente medicale profesionale.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-white text-lg mb-4">Linkuri Utile</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Acasă</a></li>
+                        <li><a href="#categorii" class="hover:text-blue-400 transition-colors">Produse</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Termeni și Condiții</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-white text-lg mb-4">Contact</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-center justify-center md:justify-start gap-2"><i class="fa-solid fa-phone w-4"></i> +373 22 123 456</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-white text-lg mb-4">Urmărește-ne</h4>
+                    <div class="flex justify-center md:justify-start gap-5 text-2xl">
+                        <a href="#" class="icon-hover-effect text-gray-400 hover:text-blue-400"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="icon-hover-effect text-gray-400 hover:text-blue-400"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="icon-hover-effect text-gray-400 hover:text-blue-400"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-12 border-t border-gray-700 pt-8 text-center text-sm text-gray-500">
+                <p>&copy; 2025 MedAsist. Toate drepturile rezervate.</p>
+                <p class="mt-2 text-sm text-gray-600">Front-End realizat de <a href="https://webglow-studio.netlify.app" target="_blank" rel="noopener noreferrer" class="font-semibold text-gray-500 hover:text-blue-400">WebGlow</a></p>
+                </div>
+        </div>
+    </footer>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- BAZA DE DATE SIMULATĂ CU CATEGORII NOI ---
+        const products = [
+            { id: 1, name: 'Electrocardiograf (ECG) portabil', category: 'Cardiologie', price: 8500, imageUrl: 'https://placehold.co/400x400/e0e0e0/333?text=ECG' },
+            { id: 2, name: 'Stetoscop Littmann Cardiology IV', category: 'Cardiologie', price: 2800, imageUrl: 'https://placehold.co/400x400/e0e0e0/333?text=Stetoscop' },
+            { id: 3, name: 'Unit Stomatologic Avansat', category: 'Stomatologie', price: 95000, imageUrl: 'https://placehold.co/400x400/e0e0e0/333?text=Unit+Dentist' },
+            { id: 4, name: 'Lampă Fotopolimerizare LED', category: 'Stomatologie', price: 1900, imageUrl: 'https://placehold.co/400x400/e0e0e0/333?text=Lampa+LED' },
+            { id: 5, name: 'Colposcop video digital', category: 'Ginecologie', price: 45000, imageUrl: 'https://placehold.co/400x400/e0e0e0/333?text=Colposcop' },
+            { id: 6, name: 'Ecograf portabil Doppler', category: 'Ginecologie', price: 78000, imageUrl: 'https://placehold.co/400x400/e0e0e0/333?text=Ecograf' },
+            { id: 7, name: 'Trusă de Mică Chirurgie', category: 'Chirurgie', price: 3200, imageUrl: 'https://placehold.co/400x400/e0e0e0/333?text=Trusa+Chirurgie' },
+            { id: 8, name: 'Electrocauter Monopolar', category: 'Chirurgie', price: 12500, imageUrl: 'https://placehold.co/400x400/e0e0e0/333?text=Electrocauter' },
+            { id: 9, name: 'Tensiometru Digital Profesional', category: 'Medicină Generală', price: 950, imageUrl: 'https://placehold.co/400x400/e0e0e0/333?text=Tensiometru' },
+            { id: 10, name: 'Oftalmoscop Profesional', category: 'Medicină Generală', price: 1500, imageUrl: 'https://placehold.co/400x400/e0e0e0/333?text=Oftalmoscop' },
+            { id: 11, name: 'Aparat de detartraj cu ultrasunete', category: 'Stomatologie', price: 4800, imageUrl: 'https://placehold.co/400x400/e0e0e0/333?text=Detartraj' },
+            { id: 12, name: 'Monitor Holter ECG 24h', category: 'Cardiologie', price: 19500, imageUrl: 'https://placehold.co/400x400/e0e0e0/333?text=Holter+ECG' },
+        ];
+
+        // --- ELEMENTE DOM ---
+        const productGrid = document.getElementById('product-grid');
+        const noProductsMessage = document.getElementById('no-products-message');
+        const desktopFiltersContainer = document.getElementById('desktop-filters-container');
+        const mobileFiltersContent = document.getElementById('mobile-filters-content');
+        const activeFiltersContainer = document.getElementById('active-filters-container');
+        
+        // Sortare
+        const sortDropdown = document.getElementById('sort-dropdown');
+        const sortByButton = document.getElementById('sort-by-button');
+        const sortByPanel = document.getElementById('sort-by-panel');
+
+        // Mobile menu
+        const openMobileFiltersBtn = document.getElementById('open-mobile-filters');
+        const closeMobileFiltersBtn = document.getElementById('close-mobile-filters');
+        const mobileFiltersMenu = document.getElementById('mobile-filters-menu');
+        const mobileFiltersOverlay = document.getElementById('mobile-filters-overlay');
+
+        // --- STAREA FILTRELOR ---
+        let activeFilters = {
+            categories: [],
+            minPrice: 0,
+            maxPrice: 100000,
+            sortBy: 'default'
+        };
+
+        // --- FUNCȚII DE RENDER ---
+        const createProductCard = (product) => `
+            <div class="product-card bg-white rounded-2xl shadow-sm overflow-hidden flex flex-col group">
+                <div class="relative">
+                    <img src="${product.imageUrl}" alt="${product.name}" class="w-full h-52 object-cover">
+                    <div class="absolute top-3 right-3">
+                         <button class="bg-white/50 backdrop-blur-sm text-gray-800 hover:text-red-500 w-9 h-9 rounded-full flex items-center justify-center transition-colors" title="Adaugă la favorite">
+                            <i class="fa-regular fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-5 flex flex-col flex-grow">
+                    <span class="text-xs font-semibold text-blue-600 uppercase tracking-wider">${product.category}</span>
+                    <h3 class="text-lg font-bold text-gray-900 mt-2 flex-grow">${product.name}</h3>
+                    <div class="mt-4">
+                        <p class="text-2xl font-extrabold text-gray-900">${product.price.toLocaleString('ro-RO')} <span class="text-base font-medium text-gray-500">MDL</span></p>
+                    </div>
+                </div>
+                <div class="p-5 pt-0">
+                    <button class="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition-colors transform group-hover:translate-y-0 translate-y-2 opacity-0 group-hover:opacity-100 duration-300 ease-out">
+                        Adaugă în coș
+                    </button>
+                </div>
+            </div>
+        `;
+
+        const createSkeletonCard = () => `
+            <div class="skeleton-card animate-pulse">
+                <div class="skeleton-img"></div>
+                <div class="p-5 space-y-4">
+                    <div class="skeleton-text w-1/3"></div>
+                    <div class="skeleton-text w-full"></div>
+                    <div class="skeleton-text w-3/4"></div>
+                    <div class="flex justify-between items-center pt-2">
+                        <div class="skeleton-price"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const renderProducts = (productsToRender) => {
+            productGrid.style.opacity = 0;
+            setTimeout(() => {
+                productGrid.innerHTML = '';
+                if (productsToRender.length === 0) {
+                    productGrid.classList.add('hidden');
+                    noProductsMessage.classList.remove('hidden');
+                } else {
+                    productGrid.classList.remove('hidden');
+                    noProductsMessage.classList.add('hidden');
+                    productsToRender.forEach(product => {
+                        productGrid.innerHTML += createProductCard(product);
+                    });
+                }
+                productGrid.style.opacity = 1;
+            }, 400);
+        };
+        
+        const renderSkeletons = (count) => {
+            productGrid.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                productGrid.innerHTML += createSkeletonCard();
+            }
+        };
+
+        const createFiltersHTML = (categories, min, max) => `
+            <div class="space-y-4">
+                <!-- Filtru Categorii (Acordeon) -->
+                <div class="filter-section open border-b pb-4">
+                    <button class="filter-section-header w-full flex justify-between items-center">
+                        <h4 class="text-lg font-bold text-gray-900">Categorii</h4>
+                        <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                    </button>
+                    <div class="filter-section-content">
+                        <div class="pt-4 space-y-3">
+                            ${categories.map(cat => `
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" data-category="${cat}" class="custom-checkbox h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition">
+                                    <span class="ml-3 text-gray-700">${cat}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+                <!-- Filtru Preț (Acordeon) -->
+                <div class="filter-section open">
+                    <button class="filter-section-header w-full flex justify-between items-center">
+                        <h4 class="text-lg font-bold text-gray-900">Preț</h4>
+                        <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                    </button>
+                    <div class="filter-section-content">
+                        <div class="pt-6">
+                            <div class="price-slider">
+                                <div class="progress"></div>
+                            </div>
+                            <div class="range-input">
+                                <input type="range" class="range-min" min="0" max="100000" value="${min}" step="100">
+                                <input type="range" class="range-max" min="0" max="100000" value="${max}" step="100">
+                            </div>
+                            <div class="flex justify-between items-center mt-4 text-sm text-gray-600">
+                                <span id="price-min-display">${min} MDL</span>
+                                <span id="price-max-display">${max} MDL</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="reset-filters-btn w-full mt-8 text-gray-600 font-medium py-2.5 rounded-lg hover:bg-gray-100 transition-colors border border-gray-300">
+                Resetează Filtrele
+            </button>
+        `;
+        
+        const renderFilters = () => {
+            const categories = [...new Set(products.map(p => p.category))].sort();
+            const filtersHTML = createFiltersHTML(categories, activeFilters.minPrice, activeFilters.maxPrice);
+            desktopFiltersContainer.innerHTML = filtersHTML;
+            mobileFiltersContent.innerHTML = filtersHTML;
+            addFilterEventListeners();
+        };
+
+        const renderActiveFilters = () => {
+            activeFiltersContainer.innerHTML = '';
+            if (activeFilters.categories.length > 0) {
+                activeFilters.categories.forEach(cat => {
+                    activeFiltersContainer.innerHTML += `<span class="flex items-center gap-2 bg-blue-100 text-blue-700 text-sm font-medium pl-3 pr-2 py-1 rounded-full">${cat}<button data-remove-category="${cat}" class="text-blue-500 hover:text-blue-700">&times;</button></span>`;
+                });
+            }
+             if (activeFilters.minPrice > 0 || activeFilters.maxPrice < 100000) {
+                 activeFiltersContainer.innerHTML += `<span class="flex items-center gap-2 bg-gray-200 text-gray-700 text-sm font-medium pl-3 pr-2 py-1 rounded-full">Preț: ${activeFilters.minPrice} - ${activeFilters.maxPrice}<button data-remove-price class="text-gray-500 hover:text-gray-700">&times;</button></span>`;
+            }
+        };
+
+        // --- LOGICA DE FILTRARE ȘI SORTARE ---
+        const applyFiltersAndSort = () => {
+            let filteredProducts = [...products];
+            if (activeFilters.categories.length > 0) {
+                filteredProducts = filteredProducts.filter(p => activeFilters.categories.includes(p.category));
+            }
+            filteredProducts = filteredProducts.filter(p => p.price >= activeFilters.minPrice && p.price <= activeFilters.maxPrice);
+            
+            switch(activeFilters.sortBy) {
+                case 'price-asc': filteredProducts.sort((a, b) => a.price - b.price); break;
+                case 'price-desc': filteredProducts.sort((a, b) => b.price - a.price); break;
+                case 'name-asc': filteredProducts.sort((a, b) => a.name.localeCompare(b.name)); break;
+            }
+
+            renderProducts(filteredProducts);
+            renderActiveFilters();
+        };
+
+        // --- EVENT LISTENERS ---
+        const addFilterEventListeners = () => {
+            document.querySelectorAll('.custom-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', (e) => {
+                    const category = e.target.dataset.category;
+                    if (e.target.checked) activeFilters.categories.push(category);
+                    else activeFilters.categories = activeFilters.categories.filter(c => c !== category);
+                    applyFiltersAndSort();
+                });
+            });
+
+            const priceGap = 5000;
+            document.querySelectorAll('.range-input input').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const container = e.target.closest('.filter-section-content');
+                    const rangeInputs = container.querySelectorAll('.range-input input');
+                    const progress = container.querySelector('.progress');
+                    let minVal = parseInt(rangeInputs[0].value), maxVal = parseInt(rangeInputs[1].value);
+
+                    if (maxVal - minVal < priceGap) {
+                        if (e.target.classList.contains('range-min')) rangeInputs[0].value = maxVal - priceGap;
+                        else rangeInputs[1].value = minVal + priceGap;
+                    } else {
+                        container.querySelector('#price-min-display').textContent = `${minVal} MDL`;
+                        container.querySelector('#price-max-display').textContent = `${maxVal} MDL`;
+                        progress.style.left = (minVal / rangeInputs[0].max) * 100 + '%';
+                        progress.style.right = 100 - (maxVal / rangeInputs[1].max) * 100 + '%';
+                    }
+                });
+                input.addEventListener('change', (e) => {
+                    const container = e.target.closest('.filter-section-content');
+                    activeFilters.minPrice = parseInt(container.querySelector('.range-min').value);
+                    activeFilters.maxPrice = parseInt(container.querySelector('.range-max').value);
+                    applyFiltersAndSort();
+                });
+            });
+
+            document.querySelectorAll('.reset-filters-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    activeFilters = { categories: [], minPrice: 0, maxPrice: 100000, sortBy: activeFilters.sortBy };
+                    renderFilters();
+                    applyFiltersAndSort();
+                });
+            });
+            
+            document.querySelectorAll('.filter-section-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    header.parentElement.classList.toggle('open');
+                });
+            });
+        };
+
+        // Sortare dropdown
+        sortByButton.addEventListener('click', () => {
+            sortByPanel.classList.toggle('opacity-0');
+            sortByPanel.classList.toggle('pointer-events-none');
+            sortByPanel.classList.toggle('-translate-y-2');
+            sortByButton.querySelector('.fa-chevron-down').classList.toggle('rotate-180');
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (!sortDropdown.contains(e.target)) {
+                 sortByPanel.classList.add('opacity-0', 'pointer-events-none', '-translate-y-2');
+                 sortByButton.querySelector('.fa-chevron-down').classList.remove('rotate-180');
+            }
+        });
+
+        document.querySelectorAll('.sort-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.preventDefault();
+                activeFilters.sortBy = e.target.dataset.sort;
+                applyFiltersAndSort();
+            });
+        });
+
+        activeFiltersContainer.addEventListener('click', (e) => {
+            if (e.target.dataset.removeCategory) {
+                const category = e.target.dataset.removeCategory;
+                activeFilters.categories = activeFilters.categories.filter(c => c !== category);
+                document.querySelectorAll(`input[data-category="${category}"]`).forEach(c => c.checked = false);
+                applyFiltersAndSort();
+            }
+            if (e.target.hasAttribute('data-remove-price')) {
+                activeFilters.minPrice = 0;
+                activeFilters.maxPrice = 100000;
+                renderFilters();
+                applyFiltersAndSort();
+            }
+        });
+
+        // Mobile filter menu
+        openMobileFiltersBtn.addEventListener('click', () => {
+            mobileFiltersOverlay.classList.remove('hidden');
+            mobileFiltersMenu.classList.remove('-translate-x-full');
+        });
+        const closeMenu = () => {
+            mobileFiltersOverlay.classList.add('hidden');
+            mobileFiltersMenu.classList.add('-translate-x-full');
+        }
+        closeMobileFiltersBtn.addEventListener('click', closeMenu);
+        mobileFiltersOverlay.addEventListener('click', closeMenu);
+
+        // --- INIȚIALIZARE ---
+        const init = () => {
+            renderSkeletons(6);
+            renderFilters();
+            setTimeout(() => {
+                applyFiltersAndSort();
+            }, 1500);
+        };
+
+        init();
+    });
+    </script>
+</body>
+</html>
